@@ -15,6 +15,7 @@ module github.com/seriiserii825/go-libs
 | `msg` | цветные сообщения `Info` / `Success` / `Error` / `Warning` |
 | `fzf` | выбор через fzf: `One`, `Multi`, `Run`, фильтр `Matches` |
 | `table` | таблица с рамкой `Show` и сетка по ширине терминала `Grid` |
+| `menu` | меню: fzf-меню с номерами, выбор индекса, ввод номера |
 | `cmd/fzf-word-filter` | бинарник-фильтр, который fzf вызывает при вводе |
 
 ## Установка в проект
@@ -41,6 +42,7 @@ fmt.Println(color.Red + "error" + color.Reset)
 ```
 
 Цвета: `Red`, `Green`, `Yellow`, `Blue`, `Magenta`, `Cyan`, `Reset`.
+`color.Strip(s)` убирает ANSI-цвета из строки.
 
 ### msg
 
@@ -114,6 +116,38 @@ table.Grid(items, color.Blue) // "" — без цвета
 
 `Grid` раскладывает элементы сверху вниз по колонкам; число колонок зависит от
 ширины терминала (если вывод не в терминал — 80).
+
+### menu
+
+```go
+import "github.com/seriiserii825/go-libs/menu"
+
+// fzf-меню с номерами: 01) Deploy, 02) Backup, 00) Exit
+n, ok, err := menu.SelectFzfMenu(
+	[]string{color.Wrap(color.Green, "Deploy"), "Backup"},
+	"Что делаем?",
+	color.Wrap(color.Red, "Exit"), // "" — без пункта Exit
+)
+switch {
+case err != nil:
+	log.Fatal(err)
+case !ok: // Esc / Ctrl-C
+case n == 0: // Exit
+default: // n = 1..len(labels)
+}
+
+// индекс выбранного варианта в options
+i, ok, err := menu.SelectFzf(options)
+
+// индексы нескольких вариантов
+idx, err := menu.SelectFzfMulti(options)
+
+// после table.Show: спросить номер 0..count-1 в консоли
+i, err := menu.ChooseOption(len(rows)) // io.EOF на Ctrl-D
+```
+
+В `SelectFzfMenu` можно фильтровать по тексту или набрать номер (`2`, `02`) и
+нажать Enter — номер в запросе важнее подсвеченной строки.
 
 ## Разработка
 

@@ -1,20 +1,19 @@
 package fzf
 
 import (
-	"regexp"
 	"strings"
+
+	"github.com/seriiserii825/go-libs/color"
 )
 
 const minChunk = 3
-
-var ansiRe = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 
 // Matches сообщает, подходит ли строка под запрос: каждое слово запроса
 // должно быть подстрокой строки или цепочкой подстрок по порядку, где каждый
 // кусок, кроме последнего, не короче minChunk символов.
 // "resdow" находит "Restore from Downloads" (res + dow), "rfd" — нет.
 func Matches(query, line string) bool {
-	text := strings.ToLower(ansiRe.ReplaceAllString(line, ""))
+	text := strings.ToLower(color.Strip(line))
 	for _, term := range strings.Fields(strings.ToLower(query)) {
 		if !chain([]rune(term), text) {
 			return false
