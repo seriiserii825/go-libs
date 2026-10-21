@@ -14,6 +14,7 @@ module github.com/seriiserii825/go-libs
 | `color` | ANSI-цвета и `Wrap` |
 | `msg` | цветные сообщения `Info` / `Success` / `Error` / `Warning` |
 | `fzf` | выбор через fzf: `One`, `Multi`, `Run`, фильтр `Matches` |
+| `table` | таблица с рамкой `Show` и сетка по ширине терминала `Grid` |
 | `cmd/fzf-word-filter` | бинарник-фильтр, который fzf вызывает при вводе |
 
 ## Установка в проект
@@ -85,6 +86,34 @@ ANSI-цвета игнорируются, кириллица поддержив�
 - `resdow` → `Restore from Downloads` (res + dow)
 - `down rest` → `Restore from Downloads` (слова в любом порядке)
 - `rfd` → не найдёт (побуквенного fuzzy нет)
+
+### table
+
+```go
+import "github.com/seriiserii825/go-libs/table"
+
+table.Show("Сайты", []string{"#", "Name", "Status"}, [][]string{
+	{"0", "Restore from Downloads", "ok"},
+	{"1", "Бэкап", "fail"},
+}, map[int]string{1: color.Red}) // цвет строки по индексу, или nil
+
+table.Grid(items, color.Blue) // "" — без цвета
+```
+
+```
+Сайты
+╭───┬────────────────────────┬────────╮
+│ # │ Name                   │ Status │
+├───┼────────────────────────┼────────┤
+│ 0 │ Restore from Downloads │ ok     │
+│ 1 │ Бэкап                  │ fail   │
+╰───┴────────────────────────┴────────╯
+пункт-00  пункт-04  пункт-08  пункт-12
+пункт-01  пункт-05  пункт-09  пункт-13
+```
+
+`Grid` раскладывает элементы сверху вниз по колонкам; число колонок зависит от
+ширины терминала (если вывод не в терминал — 80).
 
 ## Разработка
 
