@@ -57,7 +57,7 @@ func Require(tools ...Tool) error {
 		missing = append(missing, fmt.Sprintf("  %s: %s", t.Bin, t.Install))
 	}
 	if len(missing) > 0 {
-		return fmt.Errorf("required programs are not installed:\n%s", strings.Join(missing, "\n"))
+		return fmt.Errorf("required programs are not installed in your system:\n%s", strings.Join(missing, "\n"))
 	}
 	return nil
 }
