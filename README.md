@@ -17,6 +17,8 @@ module github.com/seriiserii825/go-libs
 | `table` | таблица с рамкой `Show` и сетка по ширине терминала `Grid` |
 | `menu` | меню: fzf-меню с номерами, выбор индекса, ввод номера |
 | `input` | ввод с проверкой: `Int`, `Float`, `String`, `Bool`, `Confirm` |
+| `clipboard` | буфер обмена `Read` / `Write` / `WriteSecret` (Wayland и X11) |
+| `notify` | уведомление на рабочем столе `Send` |
 | `cmd/fzf-word-filter` | бинарник-фильтр, который fzf вызывает при вводе |
 
 ## Установка в проект
@@ -168,6 +170,28 @@ s, err := input.Line("> ")                 // строка как есть, бе
 переспрашивается сам. Все функции читают через один общий буфер stdin — не
 смешивать с собственным `bufio.Scanner(os.Stdin)` в проекте, иначе часть ввода
 может потеряться.
+
+### clipboard
+
+```go
+import "github.com/seriiserii825/go-libs/clipboard"
+
+s, err := clipboard.Read()
+err = clipboard.Write("16:9")      // + уведомление с текстом
+err = clipboard.WriteSecret(pass)  // + уведомление без текста
+```
+
+Wayland (`WAYLAND_DISPLAY`) — `wl-copy` / `wl-paste`, X11 (`DISPLAY`) —
+`xclip`. Пакеты: `wl-clipboard`, `xclip`, `libnotify` (`notify-send`).
+Ошибка уведомления игнорируется — главное, что текст скопирован.
+
+### notify
+
+```go
+import "github.com/seriiserii825/go-libs/notify"
+
+err := notify.Send("Backup", "Done")
+```
 
 ## Разработка
 
