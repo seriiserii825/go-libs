@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+
+	"github.com/seriiserii825/go-libs/command"
 )
 
 // Run запускает fzf со строками lines и флагами args.
@@ -27,7 +29,7 @@ func Run(lines, args []string) (string, int, error) {
 		if err != nil {
 			return "", 0, err
 		}
-		reload := fmt.Sprintf("%s {q} %s || true", shellQuote(filter), shellQuote(f.Name()))
+		reload := fmt.Sprintf("%s {q} %s || true", command.Quote(filter), command.Quote(f.Name()))
 		args = slices.Concat(args, []string{"--disabled", "--bind", "change:reload(" + reload + ")"})
 	}
 
@@ -73,8 +75,4 @@ func Multi(options []string) ([]string, error) {
 		return nil, nil
 	}
 	return strings.Split(out, "\n"), nil
-}
-
-func shellQuote(s string) string {
-	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }

@@ -19,6 +19,7 @@ module github.com/seriiserii825/go-libs
 | `input` | ввод с проверкой: `Int`, `Float`, `String`, `Bool`, `Confirm` |
 | `clipboard` | буфер обмена `Read` / `Write` / `WriteSecret` (Wayland и X11) |
 | `notify` | уведомление на рабочем столе `Send` |
+| `command` | запуск программ: `Run`, `Output`, `Shell`, `Exists`, `Quote` |
 | `cmd/fzf-word-filter` | бинарник-фильтр, который fzf вызывает при вводе |
 
 ## Установка в проект
@@ -192,6 +193,28 @@ import "github.com/seriiserii825/go-libs/notify"
 
 err := notify.Send("Backup", "Done")
 ```
+
+### command
+
+```go
+import "github.com/seriiserii825/go-libs/command"
+
+// вывод прямо в терминал (git clone с прогрессом, интерактивные программы)
+err := command.Run("git", "clone", "--mirror", url, dir)
+
+// перехватить stdout; в ошибке будет stderr команды
+branch, err := command.Output("git", "branch", "--show-current")
+
+// через sh -c: пайпы, &&, *, ~ (значения — через Quote)
+err = command.Shell("npm ls -g | grep ttf2woff")
+err = command.Shell("cd " + command.Quote(dir) + " && npm install")
+
+if !command.Exists("woff2_compress") { ... } // как which
+code := command.ExitCode(err)                 // 0, код выхода или -1
+```
+
+`Run` и `Output` передают аргументы без shell — кавычки и `Quote` не нужны,
+пробелы в путях безопасны. `Shell` — только когда нужны возможности shell.
 
 ## Разработка
 
