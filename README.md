@@ -20,6 +20,7 @@ module github.com/seriiserii825/go-libs
 | `clipboard` | буфер обмена `Read` / `Write` / `WriteSecret` (Wayland и X11) |
 | `notify` | уведомление на рабочем столе `Send` |
 | `command` | запуск программ: `Run`, `Output`, `Shell`, `Exists`, `Quote` |
+| `cli` | подкоманды с `--help` и fzf-меню без аргументов |
 | `cmd/fzf-word-filter` | бинарник-фильтр, который fzf вызывает при вводе |
 
 ## Установка в проект
@@ -215,6 +216,41 @@ code := command.ExitCode(err)                 // 0, код выхода или -
 
 `Run` и `Output` передают аргументы без shell — кавычки и `Quote` не нужны,
 пробелы в путях безопасны. `Shell` — только когда нужны возможности shell.
+
+### cli
+
+```go
+import "github.com/seriiserii825/go-libs/cli"
+
+var app = cli.App{
+	Name: "go-scripts",
+	Commands: []cli.Command{
+		{
+			Name:  "sort-files",               // go-scripts sort-files
+			Short: "Sort files",               // в списке команд и в меню
+			Long:  "Copy every file ...",      // go-scripts sort-files --help
+			Color: color.Blue,                 // цвет в меню
+			Run:   scripts.SortFiles,          // func() error
+		},
+	},
+}
+
+func main() {
+	if err := app.Run(os.Args[1:]); err != nil && !errors.Is(err, io.EOF) {
+		msg.Error(err.Error())
+		os.Exit(1)
+	}
+}
+```
+
+```
+go-scripts                     # fzf-меню со всеми командами
+go-scripts --help              # список команд (-h, help тоже)
+go-scripts sort-files          # запустить команду сразу, без меню
+go-scripts sort-files --help   # инструкция к команде (Long)
+```
+
+Неизвестная команда или лишние аргументы — ошибка с подсказкой `--help`.
 
 ## Разработка
 
