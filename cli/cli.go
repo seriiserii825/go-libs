@@ -73,7 +73,7 @@ func (a App) menu() error {
 }
 
 func (a App) printHelp() {
-	fmt.Fprintf(out, "Usage:\n")
+	fmt.Fprintf(out, "Usage (go-libs v0.9.2):\n")
 	fmt.Fprintf(out, "  %s                    interactive menu\n", a.Name)
 	fmt.Fprintf(out, "  %s <command>          run command\n", a.Name)
 	fmt.Fprintf(out, "  %s <command> --help   command help\n", a.Name)
