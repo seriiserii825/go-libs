@@ -16,6 +16,7 @@ module github.com/seriiserii825/go-libs
 | `fzf` | выбор через fzf: `One`, `Multi`, `Run`, фильтр `Matches` |
 | `table` | таблица с рамкой `Show` и сетка по ширине терминала `Grid` |
 | `menu` | меню: fzf-меню с номерами, выбор индекса, ввод номера |
+| `input` | ввод с проверкой: `Int`, `Float`, `String`, `Bool`, `Confirm` |
 | `cmd/fzf-word-filter` | бинарник-фильтр, который fzf вызывает при вводе |
 
 ## Установка в проект
@@ -148,6 +149,25 @@ i, err := menu.ChooseOption(len(rows)) // io.EOF на Ctrl-D
 
 В `SelectFzfMenu` можно фильтровать по тексту или набрать номер (`2`, `02`) и
 нажать Enter — номер в запросе важнее подсвеченной строки.
+
+### input
+
+```go
+import "github.com/seriiserii825/go-libs/input"
+
+n, err := input.Int("Width: ")             // спрашивает, пока не введут число
+n, err := input.PositiveInt("Count: ")     // > 0
+f, err := input.Float("Ratio: ")           // 1.5
+s, err := input.String("Name: ", false)    // true — можно пустую
+b, err := input.Bool("Delete? (y/n): ")    // y/yes или n/no
+ok, err := input.Confirm("Continue?")      // Enter = да, n = нет
+s, err := input.Line("> ")                 // строка как есть, без проверки
+```
+
+`err` — только `io.EOF` (Ctrl-D) или ошибка чтения; неверный ввод
+переспрашивается сам. Все функции читают через один общий буфер stdin — не
+смешивать с собственным `bufio.Scanner(os.Stdin)` в проекте, иначе часть ввода
+может потеряться.
 
 ## Разработка
 

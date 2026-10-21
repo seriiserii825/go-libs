@@ -1,17 +1,15 @@
 package menu
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
-	"io"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/seriiserii825/go-libs/color"
 	"github.com/seriiserii825/go-libs/fzf"
+	"github.com/seriiserii825/go-libs/input"
 	"github.com/seriiserii825/go-libs/msg"
 )
 
@@ -21,19 +19,10 @@ func ChooseOption(count int) (int, error) {
 	if count <= 0 {
 		return 0, errors.New("menu: no options to choose from")
 	}
-	sc := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Printf("Please enter a number between 0 and %d: ", count-1)
-		if !sc.Scan() {
-			if err := sc.Err(); err != nil {
-				return 0, err
-			}
-			return 0, io.EOF
-		}
-		n, err := strconv.Atoi(strings.TrimSpace(sc.Text()))
+		n, err := input.Int(fmt.Sprintf("Please enter a number between 0 and %d: ", count-1))
 		if err != nil {
-			msg.Error("Input must be a number. Please try again.")
-			continue
+			return 0, err
 		}
 		if n >= 0 && n < count {
 			return n, nil
