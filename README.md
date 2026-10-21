@@ -21,6 +21,7 @@ module github.com/seriiserii825/go-libs
 | `notify` | уведомление на рабочем столе `Send` |
 | `command` | запуск программ: `Run`, `Output`, `Shell`, `Exists`, `Quote` |
 | `cli` | подкоманды с `--help` и fzf-меню без аргументов |
+| `tools` | проверка, что внешние программы установлены: `Require` |
 | `cmd/fzf-word-filter` | бинарник-фильтр, который fzf вызывает при вводе |
 
 ## Установка в проект
@@ -251,6 +252,27 @@ go-scripts sort-files --help   # инструкция к команде (Long)
 ```
 
 Неизвестная команда или лишние аргументы — ошибка с подсказкой `--help`.
+
+### tools
+
+```go
+import "github.com/seriiserii825/go-libs/tools"
+
+var toolWoff2 = tools.Tool{Bin: "woff2_compress", Install: "sudo pacman -S woff2"}
+var toolID3 = tools.Tool{
+	Bin:      "id3convert",
+	Install:  "sudo pacman -S id3lib",
+	Optional: true,                        // нет — только предупреждение
+	Without:  "ID3 tags are not stripped", // что будет без неё
+}
+
+if err := tools.Require(tools.Fzf, tools.FzfFilter, tools.Clipboard(), toolWoff2, toolID3); err != nil {
+	return err // список всех недостающих обязательных с командами установки
+}
+```
+
+Готовые: `Fzf`, `FzfFilter` (optional), `Notify` (optional), `Clipboard()` —
+`wl-copy` в Wayland, `xclip` в X11.
 
 ## Разработка
 
