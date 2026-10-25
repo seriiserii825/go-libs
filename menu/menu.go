@@ -32,30 +32,60 @@ func ChooseOption(count int) (int, error) {
 }
 
 // SelectFzf — выбор одного варианта, возвращает его индекс в options.
-// false, если ничего не выбрано.
+// Заголовком (--header) служит текущий путь по меню (BreadcrumbPath), если
+// он не пуст. false, если ничего не выбрано.
 func SelectFzf(options []string) (int, bool, error) {
-	s, ok, err := fzf.One(options)
-	if err != nil || !ok {
+	args := []string{"--height", "50%", "--reverse", "--no-mouse"}
+	args = append(args, headerArgs()...)
+	out, code, err := fzf.Run(options, args)
+	if err != nil || code != 0 {
 		return 0, false, err
+	}
+	s := strings.TrimRight(out, "\n")
+	if s == "" {
+		return 0, false, nil
 	}
 	i := slices.Index(options, s)
 	return i, i != -1, nil
 }
 
-// SelectFzfMulti — выбор нескольких вариантов, возвращает их индексы в options.
+// SelectFzfMulti — выбор нескольких вариантов, возвращает их индексы в
+// options. Заголовком (--header) служит текущий путь по меню
+// (BreadcrumbPath), если он не пуст.
 func SelectFzfMulti(options []string) ([]int, error) {
 	msg.Info("Use <Tab> to select multiple items, <Enter> to confirm.")
-	selected, err := fzf.Multi(options)
-	if err != nil {
+	args := []string{
+		"--multi",
+		"--height", "50%",
+		"--reverse",
+		"--no-mouse",
+		"--bind", "ctrl-a:select-all,ctrl-r:toggle-all",
+	}
+	args = append(args, headerArgs()...)
+	out, code, err := fzf.Run(options, args)
+	if err != nil || code != 0 {
 		return nil, err
 	}
+	out = strings.TrimRight(out, "\n")
+	if out == "" {
+		return nil, nil
+	}
 	var indexes []int
-	for _, s := range selected {
+	for _, s := range strings.Split(out, "\n") {
 		if i := slices.Index(options, s); i != -1 {
 			indexes = append(indexes, i)
 		}
 	}
 	return indexes, nil
+}
+
+// headerArgs — "--header <путь>", если текущий путь по меню не пуст, иначе
+// пусто.
+func headerArgs() []string {
+	if path := BreadcrumbPath(); path != "" {
+		return []string{"--header", path}
+	}
+	return nil
 }
 
 // breadcrumbs — стек названий вложенных меню, в которых сейчас находится
@@ -97,11 +127,6 @@ func SelectFzfMenu(labels []string, title, exitLabel string) (int, bool, error) 
 		lines = append(lines, index(0)+" "+exitLabel)
 	}
 
-	header := title
-	if path := BreadcrumbPath(); path != "" {
-		header = path
-	}
-
 	args := []string{
 		"--ansi",
 		"--reverse",
@@ -110,8 +135,10 @@ func SelectFzfMenu(labels []string, title, exitLabel string) (int, bool, error) 
 		"--height", "50%",
 		"--print-query",
 	}
-	if header != "" {
-		args = append(args, "--header", header)
+	if h := headerArgs(); h != nil {
+		args = append(args, h...)
+	} else if title != "" {
+		args = append(args, "--header", title)
 	}
 
 	out, code, err := fzf.Run(lines, args)
