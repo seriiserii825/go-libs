@@ -58,10 +58,34 @@ func SelectFzfMulti(options []string) ([]int, error) {
 	return indexes, nil
 }
 
+// breadcrumbs — стек названий вложенных меню, в которых сейчас находится
+// пользователь (см. PushBreadcrumb).
+var breadcrumbs []string
+
+// PushBreadcrumb добавляет name в конец текущего пути по меню. Вызвать
+// возвращённую функцию (обычно через defer), когда меню name закрывается,
+// чтобы убрать его из пути.
+func PushBreadcrumb(name string) func() {
+	breadcrumbs = append(breadcrumbs, name)
+	return func() {
+		if len(breadcrumbs) > 0 {
+			breadcrumbs = breadcrumbs[:len(breadcrumbs)-1]
+		}
+	}
+}
+
+// BreadcrumbPath — текущий путь по вложенным меню через " > "
+// ("Main Menu > Page checks > SEO"), "" если PushBreadcrumb ещё не вызывали.
+func BreadcrumbPath() string {
+	return strings.Join(breadcrumbs, " > ")
+}
+
 // SelectFzfMenu — цветное fzf-меню с номерами: "01) First", "02) Second",
 // "00) Exit".
 // labels могут быть цветными (color.Wrap). Можно фильтровать по тексту или
 // набрать номер и нажать Enter.
+// Заголовком меню (--header) служит полный путь по меню (BreadcrumbPath),
+// если он не пуст, иначе — title.
 // Возвращает 1..len(labels) для пункта, 0 для exitLabel (exitLabel "" — пункта
 // нет), false на Esc/Ctrl-C.
 func SelectFzfMenu(labels []string, title, exitLabel string) (int, bool, error) {
@@ -73,6 +97,11 @@ func SelectFzfMenu(labels []string, title, exitLabel string) (int, bool, error) 
 		lines = append(lines, index(0)+" "+exitLabel)
 	}
 
+	header := title
+	if path := BreadcrumbPath(); path != "" {
+		header = path
+	}
+
 	args := []string{
 		"--ansi",
 		"--reverse",
@@ -81,8 +110,8 @@ func SelectFzfMenu(labels []string, title, exitLabel string) (int, bool, error) 
 		"--height", "50%",
 		"--print-query",
 	}
-	if title != "" {
-		args = append(args, "--header", title)
+	if header != "" {
+		args = append(args, "--header", header)
 	}
 
 	out, code, err := fzf.Run(lines, args)
