@@ -53,7 +53,7 @@ func SelectFzf(options []string) (int, bool, error) {
 // options. Заголовком (--header) служит текущий путь по меню
 // (BreadcrumbPath), если он не пуст.
 func SelectFzfMulti(options []string) ([]int, error) {
-	msg.Info("Use <Tab> to select multiple items, <Enter> to confirm.")
+	msg.Info("<Tab> select, <Ctrl-A> select all, <Ctrl-R> invert selection, <Enter> confirm.")
 	args := []string{
 		"--multi",
 		"--height", "50%",
