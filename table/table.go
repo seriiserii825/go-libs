@@ -3,6 +3,7 @@ package table
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -22,22 +23,24 @@ var (
 // rowColors — цвет строки по индексу (с нуля), например {0: color.Green};
 // можно передать nil.
 func Show(title string, columns []string, rows [][]string, rowColors map[int]string) {
+	indexedColumns := append([]string{"#"}, columns...)
 	colored := make([][]string, len(rows))
 	for i, row := range rows {
+		indexed := append([]string{strconv.Itoa(i + 1)}, row...)
 		c, ok := rowColors[i]
 		if !ok {
-			colored[i] = row
+			colored[i] = indexed
 			continue
 		}
-		colored[i] = make([]string, len(row))
-		for j, cell := range row {
+		colored[i] = make([]string, len(indexed))
+		for j, cell := range indexed {
 			colored[i][j] = color.Wrap(c, cell)
 		}
 	}
 
 	t := ltable.New().
 		Border(lipgloss.RoundedBorder()).
-		Headers(columns...).
+		Headers(indexedColumns...).
 		Rows(colored...).
 		StyleFunc(func(row, col int) lipgloss.Style {
 			if row == ltable.HeaderRow {
