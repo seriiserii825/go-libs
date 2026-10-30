@@ -50,7 +50,9 @@ func Show(title string, columns []string, rows [][]string, rowColors map[int]str
 		})
 
 	if width, _, err := term.GetSize(int(os.Stdout.Fd())); err == nil && width > 0 {
-		t = t.Width(width - 1)
+		if lipgloss.Width(t.String()) > width {
+			t = t.Width(width - 1)
+		}
 	}
 
 	if title != "" {
