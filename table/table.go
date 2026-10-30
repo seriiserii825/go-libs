@@ -46,6 +46,10 @@ func Show(title string, columns []string, rows [][]string, rowColors map[int]str
 			return cellStyle
 		})
 
+	if width, _, err := term.GetSize(int(os.Stdout.Fd())); err == nil && width > 0 {
+		t = t.Width(width - 1)
+	}
+
 	if title != "" {
 		fmt.Println(titleStyle.Render(title))
 	}
