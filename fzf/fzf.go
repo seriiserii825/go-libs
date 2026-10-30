@@ -13,12 +13,16 @@ import (
 
 // Run запускает fzf со строками lines и флагами args.
 // Если в PATH есть fzf-word-filter, фильтрация идёт через него, а не через
-// собственный поиск fzf. Возвращает вывод fzf и код выхода:
+// собственный поиск fzf — кроме --multi: reload на каждое изменение запроса
+// заменяет весь список кандидатов у fzf, из-за чего слетают отметки Tab (fzf
+// не гарантирует их сохранение, если промежуточный список оказался другим
+// или пустым). Поэтому для --multi остаётся обычный fuzzy-поиск fzf.
+// Возвращает вывод fzf и код выхода:
 // 0 — выбор сделан, 1 — нет совпадений, 130 — Esc/Ctrl-C.
 func Run(lines, args []string) (string, int, error) {
 	input := strings.Join(lines, "\n")
 
-	if filter, err := exec.LookPath("fzf-word-filter"); err == nil {
+	if filter, err := exec.LookPath("fzf-word-filter"); err == nil && !slices.Contains(args, "--multi") {
 		f, err := os.CreateTemp("", "*.fzf")
 		if err != nil {
 			return "", 0, err
