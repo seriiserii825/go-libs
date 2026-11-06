@@ -35,7 +35,7 @@ func ChooseOption(count int) (int, error) {
 // Заголовком (--header) служит текущий путь по меню (BreadcrumbPath), если
 // он не пуст. false, если ничего не выбрано.
 func SelectFzf(options []string) (int, bool, error) {
-	args := []string{"--height", "50%", "--reverse", "--no-mouse"}
+	args := []string{"--height", fzf.Height, "--reverse", "--no-mouse"}
 	args = append(args, headerArgs()...)
 	out, code, err := fzf.Run(options, args)
 	if err != nil || code != 0 {
@@ -56,7 +56,7 @@ func SelectFzfMulti(options []string) ([]int, error) {
 	msg.Info("<Tab> select, <Ctrl-A> select all, <Ctrl-R> invert selection, <Enter> confirm.")
 	args := []string{
 		"--multi",
-		"--height", "50%",
+		"--height", fzf.Height,
 		"--reverse",
 		"--no-mouse",
 		"--bind", "ctrl-a:select-all,ctrl-r:toggle-all",
@@ -132,7 +132,7 @@ func SelectFzfMenu(labels []string, title, exitLabel string) (int, bool, error) 
 		"--reverse",
 		"--no-mouse",
 		"--no-sort",
-		"--height", "50%",
+		"--height", fzf.Height,
 		"--print-query",
 	}
 	if h := headerArgs(); h != nil {

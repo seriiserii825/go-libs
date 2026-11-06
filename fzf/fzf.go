@@ -11,6 +11,10 @@ import (
 	"github.com/seriiserii825/go-libs/command"
 )
 
+// Height — высота окна fzf для --height: по длине списка, но не больше экрана.
+// Короткий список не занимает лишнего, длинный не обрезается раньше времени.
+const Height = "~100%"
+
 // Run запускает fzf со строками lines и флагами args.
 // Если в PATH есть fzf-word-filter, фильтрация идёт через него, а не через
 // собственный поиск fzf — кроме --multi: reload на каждое изменение запроса
@@ -53,7 +57,7 @@ func Run(lines, args []string) (string, int, error) {
 
 // One — выбор одного варианта. false, если ничего не выбрано.
 func One(options []string) (string, bool, error) {
-	out, code, err := Run(options, []string{"--height", "50%", "--reverse", "--no-mouse"})
+	out, code, err := Run(options, []string{"--height", Height, "--reverse", "--no-mouse"})
 	if err != nil || code != 0 {
 		return "", false, err
 	}
@@ -66,7 +70,7 @@ func One(options []string) (string, bool, error) {
 func Multi(options []string) ([]string, error) {
 	out, code, err := Run(options, []string{
 		"--multi",
-		"--height", "50%",
+		"--height", Height,
 		"--reverse",
 		"--no-mouse",
 		"--bind", "ctrl-a:select-all,ctrl-r:toggle-all",
